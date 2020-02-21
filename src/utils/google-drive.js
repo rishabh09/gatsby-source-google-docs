@@ -109,6 +109,7 @@ async function fetchTree({
               name: folder.name,
               mimeType: folder.mimeType,
               files,
+              folderId,
             })
           }
 
@@ -150,6 +151,7 @@ async function fetchGoogleDriveFiles({
             path: "",
             files: googleDriveTree,
             fieldsMapper,
+            rootFolderId: folderId,
           })
 
           googleDriveFiles.push(...flattenGoogleDriveFiles)
@@ -166,7 +168,7 @@ async function fetchGoogleDriveFiles({
   return googleDriveFiles
 }
 
-function flattenTree({path, files, fieldsMapper}) {
+function flattenTree({path, files, fieldsMapper, rootFolderId}) {
   const documents = files
     .filter(file => file.mimeType === MIME_TYPE_DOCUMENT)
     .map(file => {
@@ -174,7 +176,7 @@ function flattenTree({path, files, fieldsMapper}) {
         ? file[fieldsMapper["name"]]
         : file.name
 
-      return {...file, path: `${path}/${_kebabCase(fileName)}`}
+      return {...file, path: `${path}/${_kebabCase(fileName)}`, rootFolderId}
     })
 
   const documentsInFolders = files
@@ -184,6 +186,7 @@ function flattenTree({path, files, fieldsMapper}) {
         path: `${path}/${_kebabCase(folder.name)}`,
         files: folder.files,
         fieldsMapper,
+        rootFolderId,
       })
 
       acc.push(...folderFiles)
