@@ -5,7 +5,11 @@ const {
   convertJsonToMarkdown,
 } = require("./converters")
 const {googleAuth} = require("./google-auth")
-const {fetchGoogleDriveFiles} = require("./google-drive")
+const {
+  fetchGoogleDriveFiles,
+  MIME_TYPE_DOCUMENT,
+  MIME_TYPE_SHEET,
+} = require("./google-drive")
 
 async function fetchGoogleDocsContent({id}) {
   const auth = googleAuth.getAuth()
@@ -30,24 +34,55 @@ async function fetchGoogleDocsContent({id}) {
   })
 }
 
+async function fetchGoogleSpreadSheet({id}) {
+  const auth = googleAuth.getAuth()
+
+  return new Promise((resolve, reject) => {
+    google.sheets({version: "v4", auth}).spreadsheets.get(
+      {
+        spreadsheetId: id,
+      },
+      (err, res) => {
+        if (err) {
+          return reject(err)
+        }
+
+        if (!res.data) {
+          return reject("Empty data")
+        }
+        resolve(res.data)
+      }
+    )
+  })
+}
+
 async function fetchGoogleDocsDocuments(pluginOptions) {
   const googleDriveFiles = await fetchGoogleDriveFiles(pluginOptions)
 
   return Promise.all(
     googleDriveFiles.map(async file => {
-      const content = await fetchGoogleDocsContent({
-        id: file.id,
-      })
+      if (file.mimeType === MIME_TYPE_DOCUMENT) {
+        const content = await fetchGoogleDocsContent({
+          id: file.id,
+        })
 
-      const markdown = convertJsonToMarkdown({file, content})
+        const markdown = convertJsonToMarkdown({file, content})
 
-      const document = {
-        ...file,
-        content,
-        markdown,
+        const document = {
+          ...file,
+          content,
+          markdown,
+        }
+
+        return document
+      } else if (file.mimeType === MIME_TYPE_SHEET) {
+        const content = await fetchGoogleSpreadSheet({
+          id: file.id,
+        })
+        return file
+      } else {
+        console.log("type :", file.mimeType)
       }
-
-      return document
     })
   )
 }

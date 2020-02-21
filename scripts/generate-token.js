@@ -13,6 +13,8 @@ const DOCS_API_URL =
   "https://console.developers.google.com/apis/library/docs.googleapis.com"
 const DRIVE_API_URL =
   "https://console.developers.google.com/apis/library/drive.googleapis.com"
+const SHEET_API_URL =
+  "https://console.developers.google.com/apis/library/sheets.googleapis.com"
 const OAUTH_URL =
   "https://console.developers.google.com/apis/credentials/oauthclient"
 
@@ -41,6 +43,13 @@ async function generateToken() {
     console.log("")
     console.info("Enable Google Docs API:")
     console.log(DOCS_API_URL)
+    console.log("")
+
+    await waitConfirmation()
+
+    console.log("")
+    console.info("Enable Google Spreadsheets API:")
+    console.log(SHEET_API_URL)
     console.log("")
 
     await waitConfirmation()
@@ -90,6 +99,7 @@ async function generateToken() {
       access_type: "offline",
       scope: [
         "https://www.googleapis.com/auth/documents.readonly",
+        "https://www.googleapis.com/auth/spreadsheets.readonly",
         "https://www.googleapis.com/auth/drive.metadata.readonly",
       ],
       prompt: "consent",

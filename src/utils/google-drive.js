@@ -6,6 +6,7 @@ const {googleAuth} = require("./google-auth")
 
 const MIME_TYPE_DOCUMENT = "application/vnd.google-apps.document"
 const MIME_TYPE_FOLDER = "application/vnd.google-apps.folder"
+const MIME_TYPE_SHEET = "application/vnd.google-apps.spreadsheet"
 
 const enhanceDocument = ({
   document,
@@ -76,7 +77,7 @@ async function fetchTree({
         supportsAllDrives: true,
         q: `${
           folderId ? `'${folderId}' in parents and ` : ""
-        }(mimeType='${MIME_TYPE_FOLDER}' or mimeType='${MIME_TYPE_DOCUMENT}') and trashed = false`,
+        }(mimeType='${MIME_TYPE_FOLDER}' or mimeType='${MIME_TYPE_DOCUMENT}' or mimeType='${MIME_TYPE_SHEET}') and trashed = false`,
         fields: `files(id, mimeType, name, description, createdTime, modifiedTime, starred${
           fields ? `, ${fields.join(", ")}` : ""
         })`,
@@ -87,7 +88,9 @@ async function fetchTree({
         }
 
         const rawDocuments = res.data.files.filter(
-          file => file.mimeType === MIME_TYPE_DOCUMENT
+          file =>
+            file.mimeType === MIME_TYPE_DOCUMENT ||
+            file.mimeType === MIME_TYPE_SHEET
         )
         const rawFolders = res.data.files.filter(
           file => file.mimeType === MIME_TYPE_FOLDER
@@ -161,15 +164,24 @@ async function fetchGoogleDriveFiles({folders = [null], ...options}) {
   return googleDriveFiles
 }
 
-function flattenTree({path, files, fieldsMapper, rootFolderId}) {
+function flattenTree({path, files, fieldsMapper, rootFolderId, folder = ""}) {
   const documents = files
-    .filter(file => file.mimeType === MIME_TYPE_DOCUMENT)
+    .filter(
+      file =>
+        file.mimeType === MIME_TYPE_DOCUMENT ||
+        file.mimeType === MIME_TYPE_SHEET
+    )
     .map(file => {
       const fileName = fieldsMapper["name"]
         ? file[fieldsMapper["name"]]
         : file.name
 
-      return {...file, path: `${path}/${_kebabCase(fileName)}`, rootFolderId}
+      return {
+        ...file,
+        path: `${path}/${_kebabCase(fileName)}`,
+        rootFolderId,
+        folder,
+      }
     })
 
   const documentsInFolders = files
@@ -180,6 +192,7 @@ function flattenTree({path, files, fieldsMapper, rootFolderId}) {
         files: folder.files,
         fieldsMapper,
         rootFolderId,
+        folder: folder.name,
       })
 
       acc.push(...folderFiles)
@@ -192,4 +205,6 @@ function flattenTree({path, files, fieldsMapper, rootFolderId}) {
 
 module.exports = {
   fetchGoogleDriveFiles,
+  MIME_TYPE_DOCUMENT,
+  MIME_TYPE_SHEET,
 }

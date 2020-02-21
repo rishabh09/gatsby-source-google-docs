@@ -1,5 +1,6 @@
 const {fetchGoogleDocsDocuments} = require("./utils/google-docs")
 const {fetchAndReplaceGoogleImages} = require("./utils/images")
+const {MIME_TYPE_SHEET} = require("./utils/google-drive")
 
 exports.sourceNodes = async (
   {
@@ -16,32 +17,36 @@ exports.sourceNodes = async (
     const googleDocsDocuments = await fetchGoogleDocsDocuments(pluginOptions)
 
     for (const document of googleDocsDocuments) {
-      const documentNodeId = createNodeId(`GoogleDocs-${document.id}`)
+      if (document && document.mimeType !== MIME_TYPE_SHEET) {
+        const documentNodeId =
+          document && createNodeId(`GoogleDocs-${document.id}`)
 
-      if (pluginOptions.replaceGoogleImages !== false) {
-        document.markdown = await fetchAndReplaceGoogleImages({
-          documentNodeId,
+        if (pluginOptions.replaceGoogleImages !== false) {
+          document.markdown = await fetchAndReplaceGoogleImages({
+            documentNodeId,
+            document,
+            store,
+            cache,
+            createNode,
+            createNodeId,
+          })
+        }
+
+        createNode({
           document,
-          store,
-          cache,
-          createNode,
-          createNodeId,
+          id: documentNodeId,
+          internal: {
+            type: "GoogleDocs",
+            mediaType: "text/markdown",
+            content: document.markdown,
+            contentDigest: createContentDigest(document.markdown),
+          },
+          dir: process.cwd(),
         })
       }
-
-      createNode({
-        document,
-        id: documentNodeId,
-        internal: {
-          type: "GoogleDocs",
-          mediaType: "text/markdown",
-          content: document.markdown,
-          contentDigest: createContentDigest(document.markdown),
-        },
-        dir: process.cwd(),
-      })
     }
   } catch (e) {
+    console.log(e)
     if (pluginOptions.debug) {
       reporter.panic(`source-google-docs: `, e)
     } else {

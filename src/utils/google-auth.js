@@ -18,6 +18,7 @@ const isScopeValid = scope =>
   [
     "https://www.googleapis.com/auth/documents.readonly",
     "https://www.googleapis.com/auth/drive.metadata.readonly",
+    "https://www.googleapis.com/auth/spreadsheets.readonly",
   ].every(permission => scope.includes(permission))
 
 const isTokenValid = token =>
