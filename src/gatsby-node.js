@@ -17,7 +17,19 @@ exports.sourceNodes = async (
     const googleDocsDocuments = await fetchGoogleDocsDocuments(pluginOptions)
 
     for (const document of googleDocsDocuments) {
-      if (document && document.mimeType !== MIME_TYPE_SHEET) {
+      if (document && document.mimeType === MIME_TYPE_SHEET) {
+        const documentNodeId =
+          document && createNodeId(`GoogleSheet-${document.id}`)
+        createNode({
+          document,
+          id: documentNodeId,
+          internal: {
+            type: "GoogleSheet",
+            contentDigest: createContentDigest(document.content),
+          },
+          dir: process.cwd(),
+        })
+      } else {
         const documentNodeId =
           document && createNodeId(`GoogleDocs-${document.id}`)
 

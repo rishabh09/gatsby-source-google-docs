@@ -102,4 +102,5 @@ let googleAuth = new GoogleAuth()
 
 module.exports = {
   googleAuth,
+  tokenPath,
 }

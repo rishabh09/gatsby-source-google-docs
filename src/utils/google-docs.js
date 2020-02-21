@@ -1,15 +1,15 @@
 const {google} = require("googleapis")
-
 const {
   convertGoogleDocumentToJson,
   convertJsonToMarkdown,
 } = require("./converters")
-const {googleAuth} = require("./google-auth")
+const {googleAuth, tokenPath} = require("./google-auth")
 const {
   fetchGoogleDriveFiles,
   MIME_TYPE_DOCUMENT,
   MIME_TYPE_SHEET,
 } = require("./google-drive")
+const {fetchGoogleSpreadSheet} = require("./google-sheet")
 
 async function fetchGoogleDocsContent({id}) {
   const auth = googleAuth.getAuth()
@@ -29,28 +29,6 @@ async function fetchGoogleDocsContent({id}) {
         }
 
         resolve(convertGoogleDocumentToJson(res.data))
-      }
-    )
-  })
-}
-
-async function fetchGoogleSpreadSheet({id}) {
-  const auth = googleAuth.getAuth()
-
-  return new Promise((resolve, reject) => {
-    google.sheets({version: "v4", auth}).spreadsheets.get(
-      {
-        spreadsheetId: id,
-      },
-      (err, res) => {
-        if (err) {
-          return reject(err)
-        }
-
-        if (!res.data) {
-          return reject("Empty data")
-        }
-        resolve(res.data)
       }
     )
   })
@@ -79,7 +57,10 @@ async function fetchGoogleDocsDocuments(pluginOptions) {
         const content = await fetchGoogleSpreadSheet({
           id: file.id,
         })
-        return file
+        return {
+          ...file,
+          content,
+        }
       } else {
         console.log("type :", file.mimeType)
       }
