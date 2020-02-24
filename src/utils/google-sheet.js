@@ -20,7 +20,7 @@ async function fetchGoogleSpreadSheet({id}) {
     google.sheets({version: "v4", auth}).spreadsheets.values.get(
       {
         spreadsheetId: id,
-        range: "Sheet1!A:E",
+        range: "Sheet1!A:Z",
       },
       (err, res) => {
         if (err) {
