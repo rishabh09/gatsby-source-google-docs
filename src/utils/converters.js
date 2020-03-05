@@ -3,6 +3,8 @@ const YAML = require("yamljs")
 const _last = require("lodash/last")
 const _get = require("lodash/get")
 const _repeat = require("lodash/repeat")
+const {getToc, slugGenerate} = require("./toc")
+const _cloneDeep = require("lodash/cloneDeep")
 
 function getParagraphTag(p) {
   const tags = {
@@ -113,13 +115,28 @@ function getText(element, {isHeader = false} = {}) {
   return text
 }
 
-function convertGoogleDocumentToJson(data) {
-  const {body, inlineObjects, lists} = data
-  const content = []
+function checkHeadingId(curHeadingId, toc) {
+  if (!curHeadingId) return false
+  return !!Object.values(toc).find(({headingId, items}) => {
+    return (
+      items.find(({headingId}) => curHeadingId === headingId) ||
+      headingId === curHeadingId
+    )
+  })
+}
 
-  body.content.forEach(({paragraph, table}, i) => {
-    // Paragraphs
-    if (paragraph) {
+function convertGoogleDocumentToJson(data) {
+  const {body, inlineObjects, lists, title} = data
+  const pages = []
+  let content = []
+  let toc = {}
+  let currentTitle = ""
+
+  body.content.forEach(({paragraph, table, tableOfContents}, i) => {
+    if (tableOfContents) {
+      toc = getToc(tableOfContents, title)
+    } else if (paragraph) {
+      // Paragraph
       const tag = getParagraphTag(paragraph)
 
       // Lists
@@ -172,9 +189,23 @@ function convertGoogleDocumentToJson(data) {
 
           // Headings, Texts
           else if (el.textRun && el.textRun.content !== "\n") {
+            const headingId = paragraph.paragraphStyle.headingId
+            const isInToc = checkHeadingId(headingId, toc)
+            const text = getText(el, {isHeader: tag !== "p"})
             tagContent.push({
-              [tag]: getText(el, {isHeader: tag !== "p"}),
+              [tag]: text,
             })
+            currentTitle = currentTitle ? currentTitle : text // if there is no current title set it to first title
+            if (text === "FAQs") console.log(isInToc)
+            if (isInToc) {
+              pages.push({
+                slug: slugGenerate(currentTitle),
+                title: currentTitle,
+                content: _cloneDeep(content),
+              })
+              content = []
+              currentTitle = text
+            }
           }
         })
 
@@ -206,9 +237,17 @@ function convertGoogleDocumentToJson(data) {
         },
       })
     }
+
+    if (i === body.content.length - 1) {
+      pages.push({
+        slug: slugGenerate(currentTitle),
+        title: currentTitle,
+        content: _cloneDeep(content),
+      })
+    }
   })
 
-  return content
+  return {pages, toc}
 }
 
 function convertJsonToMarkdown({content, file}) {
@@ -217,7 +256,7 @@ function convertJsonToMarkdown({content, file}) {
   return `---
 ${YAML.stringify(file)}
 ---
-  
+
 ${json2md(content)}`
 }
 
