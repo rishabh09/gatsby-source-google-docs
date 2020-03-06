@@ -117,7 +117,7 @@ function getText(element, {isHeader = false} = {}) {
 
 function checkHeadingId(curHeadingId, toc) {
   if (!curHeadingId) return false
-  return !!Object.values(toc).find(({headingId, items}) => {
+  return !!toc.find(({headingId, items}) => {
     return (
       items.find(({headingId}) => curHeadingId === headingId) ||
       headingId === curHeadingId
@@ -126,15 +126,15 @@ function checkHeadingId(curHeadingId, toc) {
 }
 
 function convertGoogleDocumentToJson(data) {
-  const {body, inlineObjects, lists, title} = data
+  const {body, inlineObjects, lists} = data
   const pages = []
   let content = []
-  let toc = {}
+  let toc = []
   let currentTitle = ""
 
   body.content.forEach(({paragraph, table, tableOfContents}, i) => {
     if (tableOfContents) {
-      toc = getToc(tableOfContents, title)
+      toc = getToc(tableOfContents)
     } else if (paragraph) {
       // Paragraph
       const tag = getParagraphTag(paragraph)
@@ -195,9 +195,10 @@ function convertGoogleDocumentToJson(data) {
             tagContent.push({
               [tag]: text,
             })
-            currentTitle = currentTitle ? currentTitle : text // if there is no current title set it to first title
-            if (text === "FAQs") console.log(isInToc)
-            if (isInToc) {
+            if (!currentTitle && isInToc) {
+              content = []
+              currentTitle = text
+            } else if (isInToc) {
               pages.push({
                 slug: slugGenerate(currentTitle),
                 title: currentTitle,
@@ -239,9 +240,19 @@ function convertGoogleDocumentToJson(data) {
     }
 
     if (i === body.content.length - 1) {
+      const isTocEmpty = toc.length === 0
+      const title = isTocEmpty ? data.title : currentTitle
+      const slug = slugGenerate(title)
+      if (isTocEmpty) {
+        toc.push({
+          title,
+          slug,
+          items: [],
+        })
+      }
       pages.push({
-        slug: slugGenerate(currentTitle),
-        title: currentTitle,
+        slug: slugGenerate(title),
+        title: title,
         content: _cloneDeep(content),
       })
     }

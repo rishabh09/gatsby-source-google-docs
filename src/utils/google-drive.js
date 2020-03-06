@@ -67,6 +67,7 @@ async function fetchTree({
   fields,
   fieldsDefault,
   fieldsMapper,
+  customQuery,
 }) {
   const auth = googleAuth.getAuth()
 
@@ -77,7 +78,9 @@ async function fetchTree({
         supportsAllDrives: true,
         q: `${
           folderId ? `'${folderId}' in parents and ` : ""
-        }(mimeType='${MIME_TYPE_FOLDER}' or mimeType='${MIME_TYPE_DOCUMENT}' or mimeType='${MIME_TYPE_SHEET}') and trashed = false`,
+        }(mimeType='${MIME_TYPE_FOLDER}' or mimeType='${MIME_TYPE_DOCUMENT}' or mimeType='${MIME_TYPE_SHEET}') and trashed = false${
+          customQuery ? " " + customQuery : ""
+        } `,
         fields: `files(id, mimeType, name, description, createdTime, modifiedTime, starred${
           fields ? `, ${fields.join(", ")}` : ""
         })`,
@@ -123,6 +126,7 @@ async function fetchTree({
             fields,
             fieldsMapper,
             rootFolderId: folderId,
+            customQuery,
           })
 
           folders.push({
