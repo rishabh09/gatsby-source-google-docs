@@ -239,6 +239,7 @@ function convertGoogleDocumentToJson(data) {
           )
           content.push({
             code: {
+              lang: "sh", //set default to sh. TODO: add language detection
               content: codeArr.join(" ").split("\u000b"),
             },
           })
