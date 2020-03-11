@@ -226,17 +226,36 @@ function convertGoogleDocumentToJson(data) {
 
     // Table
     else if (table && table.tableRows.length > 0) {
-      const [thead, ...tbody] = table.tableRows
-      content.push({
-        table: {
-          headers: thead.tableCells.map(({content}) =>
-            getTableCellContent(content)
-          ),
-          rows: tbody.map(row =>
-            row.tableCells.map(({content}) => getTableCellContent(content))
-          ),
-        },
-      })
+      const isCodeBlock =
+        table.rows === 1 &&
+        table.columns === 1 &&
+        Object.keys(table.tableStyle).length === 0
+      if (isCodeBlock) {
+        const cell = table.tableRows[0].tableCells[0]
+        if (cell) {
+          const paragraph = cell.content[0].paragraph
+          const codeArr = paragraph.elements.map(
+            el => (el.textRun && el.textRun.content) || ""
+          )
+          content.push({
+            code: {
+              content: codeArr.join(" ").split("\u000b"),
+            },
+          })
+        }
+      } else {
+        const [thead, ...tbody] = table.tableRows
+        content.push({
+          table: {
+            headers: thead.tableCells.map(({content}) =>
+              getTableCellContent(content)
+            ),
+            rows: tbody.map(row =>
+              row.tableCells.map(({content}) => getTableCellContent(content))
+            ),
+          },
+        })
+      }
     }
 
     if (i === body.content.length - 1) {
