@@ -125,7 +125,7 @@ function checkHeadingId(curHeadingId, toc) {
   })
 }
 
-function convertGoogleDocumentToJson(data) {
+function convertGoogleDocumentToJson(data, breadcrumb) {
   const {body, inlineObjects, lists} = data
   const pages = []
   let content = []
@@ -133,7 +133,8 @@ function convertGoogleDocumentToJson(data) {
   let currentTitle = ""
 
   body.content.forEach(({paragraph, table, tableOfContents}, i) => {
-    if (tableOfContents) {
+    if (tableOfContents && breadcrumb.length < 2) {
+      // page is nested
       toc = getToc(tableOfContents)
     } else if (paragraph) {
       // Paragraph
@@ -261,13 +262,18 @@ function convertGoogleDocumentToJson(data) {
 
     if (i === body.content.length - 1) {
       const isTocEmpty = toc.length === 0
-      const title = isTocEmpty ? data.title : currentTitle
-      const slug = slugGenerate(title)
+      let title = isTocEmpty ? data.title : currentTitle
+      let headingTitle = breadcrumb.length > 1 ? breadcrumb[1] : title
       if (isTocEmpty) {
         toc.push({
-          title,
-          slug,
-          items: [],
+          title: headingTitle,
+          slug: slugGenerate(headingTitle),
+          items: [
+            {
+              text: title,
+              slug: slugGenerate(title),
+            },
+          ],
         })
       }
       pages.push({
