@@ -4,15 +4,15 @@
 
 `gatsby-source-google-docs` is a [Gatsby](https://www.gatsbyjs.org/) plugin to use [Google Docs](https://docs.google.com/) as a data source.
 
-Why to use [Google Gocs](https://docs.google.com/) to write your content :
+Why use [Google Docs](https://docs.google.com/) to write your content :
 
 -   🖋 Best online WYSIWYG editor
 -   🖥 Desktop web app
 -   📱 Mobile app
 -   🛩 Offline redaction
 -   🔥 No need for external CMS
--   ✅ No more content is your source code
--   🗂 Automatic breadbrumb generation
+-   ✅ No more content in your source code
+-   🗂 Automatic breadcrumb generation
 -   🤡 Custom metadata fields
 
 ## Usage
@@ -23,13 +23,13 @@ Why to use [Google Gocs](https://docs.google.com/) to write your content :
 yarn add gatsby-source-google-docs gatsby-transformer-remark gatsby-remark-images
 ```
 
-2. Open a terminal at the root of your project and [Generate a token](./token.md)
+2. Open a terminal at the root of your project and [Generate a token](./docs/token.md)
 
 ```shell
 gatsby-source-google-docs-token
 ```
 
-3. [Add the plugin](./options.md) in your `gatsby-config.js` file
+3. [Add the plugin](./docs/options.md) in your `gatsby-config.js` file
 
 ```js
 module.exports = {
@@ -45,14 +45,14 @@ module.exports = {
 }
 ```
 
-4. [Create pages](./pages.md)
+4. [Create pages](./docs/pages.md)
 
 ## Documentation
 
--   [Token](./token.md)
--   [Options](./options.md)
--   [Create pages](./pages.md)
--   [FAQ](./faq.md)
+-   [Token](./docs/token.md)
+-   [Options](./docs/options.md)
+-   [Create pages](./docs/pages.md)
+-   [FAQ](./docs/faq.md)
 
 ## Contributing
 

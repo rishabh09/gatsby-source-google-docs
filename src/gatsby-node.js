@@ -19,7 +19,7 @@ exports.sourceNodes = async (
     for (const document of googleDocsDocuments) {
       if (document && document.mimeType === MIME_TYPE_SHEET) {
         const documentNodeId =
-          document && createNodeId(`GoogleSheet-${document.id}`)
+          document && createNodeId(`google-sheets-${document.id}`)
         createNode({
           document,
           id: documentNodeId,
@@ -30,8 +30,7 @@ exports.sourceNodes = async (
           dir: process.cwd(),
         })
       } else {
-        const documentNodeId =
-          document && createNodeId(`GoogleDocs-${document.id}`)
+        const documentNodeId = createNodeId(`google-docs-${document.id}`)
 
         if (pluginOptions.replaceGoogleImages !== false) {
           document.markdown = await fetchAndReplaceGoogleImages({
