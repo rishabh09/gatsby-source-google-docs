@@ -11,7 +11,7 @@ const {
 } = require("./google-drive")
 const {fetchGoogleSpreadSheet} = require("./google-sheet")
 
-async function fetchGoogleDocsContent({id, breadcrumb}) {
+async function fetchGoogleDocsContent({id, breadcrumb = []}) {
   const auth = googleAuth.getAuth()
 
   return new Promise((resolve, reject) => {
@@ -35,7 +35,10 @@ async function fetchGoogleDocsContent({id, breadcrumb}) {
 }
 
 async function fetchGoogleDocsDocuments(pluginOptions) {
-  const googleDriveFiles = await fetchGoogleDriveFiles(pluginOptions)
+  const googleDriveFiles =
+    pluginOptions.files && pluginOptions.files.length
+      ? pluginOptions.files.map(id => ({id, mimeType: MIME_TYPE_DOCUMENT}))
+      : await fetchGoogleDriveFiles(pluginOptions)
 
   let files = []
   for (let file of googleDriveFiles) {
@@ -52,6 +55,7 @@ async function fetchGoogleDocsDocuments(pluginOptions) {
           slug,
           toc,
           title,
+          collection: pluginOptions.name,
         }
         const markdown = convertJsonToMarkdown({file: newFile, content})
         const document = {
@@ -68,6 +72,7 @@ async function fetchGoogleDocsDocuments(pluginOptions) {
       })
       files.push({
         ...file,
+        collection: pluginOptions.name,
         content,
       })
     } else {

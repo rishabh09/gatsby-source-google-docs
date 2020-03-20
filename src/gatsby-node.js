@@ -15,7 +15,7 @@ exports.sourceNodes = async (
 ) => {
   try {
     const googleDocsDocuments = await fetchGoogleDocsDocuments(pluginOptions)
-
+    console.log(pluginOptions.name)
     for (const document of googleDocsDocuments) {
       if (document && document.mimeType === MIME_TYPE_SHEET) {
         const documentNodeId =
