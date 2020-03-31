@@ -51,7 +51,9 @@ function getTextFromParagraph(p) {
 function getTableCellContent(content) {
   if (!content.length === 0) return ""
   return content
-    .map(({paragraph}) => cleanText(getTextFromParagraph(paragraph)))
+    .map(({paragraph}) => {
+      return cleanText(getTextFromParagraph(paragraph))
+    })
     .join("")
 }
 
@@ -227,10 +229,7 @@ function convertGoogleDocumentToJson(data, breadcrumb) {
 
     // Table
     else if (table && table.tableRows.length > 0) {
-      const isCodeBlock =
-        table.rows === 1 &&
-        table.columns === 1 &&
-        Object.keys(table.tableStyle).length === 0
+      const isCodeBlock = table.rows === 1 && table.columns === 1
       if (isCodeBlock) {
         const cell = table.tableRows[0].tableCells[0]
         if (cell) {
