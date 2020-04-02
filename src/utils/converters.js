@@ -235,18 +235,14 @@ function convertGoogleDocumentToJson(data, breadcrumb) {
         if (cell) {
           const codeArr = cell.content.reduce((acc, {paragraph}) => {
             const code = paragraph.elements.map(
-              el =>
-                (el.textRun &&
-                  el.textRun.content &&
-                  el.textRun.content.trim()) ||
-                ""
+              el => (el.textRun && el.textRun.content) || ""
             )
-            acc = acc.concat(code.join(" ").split("\u000b"))
+            acc = acc.concat(code)
             return acc
           }, [])
           content.push({
             code: {
-              lang: "bash", //set default to bash. TODO: add language detection
+              lang: "sh", //set default to sh
               content: codeArr.join(" ").split("\u000b"),
             },
           })
