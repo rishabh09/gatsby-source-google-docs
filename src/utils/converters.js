@@ -233,13 +233,20 @@ function convertGoogleDocumentToJson(data, breadcrumb) {
       if (isCodeBlock) {
         const cell = table.tableRows[0].tableCells[0]
         if (cell) {
-          const paragraph = cell.content[0].paragraph
-          const codeArr = paragraph.elements.map(
-            el => (el.textRun && el.textRun.content) || ""
-          )
+          const codeArr = cell.content.reduce((acc, {paragraph}) => {
+            const code = paragraph.elements.map(
+              el =>
+                (el.textRun &&
+                  el.textRun.content &&
+                  el.textRun.content.trim()) ||
+                ""
+            )
+            acc = acc.concat(code.join(" ").split("\u000b"))
+            return acc
+          }, [])
           content.push({
             code: {
-              lang: "sh", //set default to sh. TODO: add language detection
+              lang: "bash", //set default to bash. TODO: add language detection
               content: codeArr.join(" ").split("\u000b"),
             },
           })
