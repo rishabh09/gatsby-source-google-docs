@@ -92,6 +92,9 @@ function getText(element, {isHeader = false} = {}) {
     italic,
   } = element.textRun.textStyle
 
+  const tickRegex = /(?<=`)(.*?)(?=`)/g
+  text = tickRegex.test(text) ? text : text.replace(/_/g, "\\_")
+
   if (underline) {
     // Underline isn't supported in markdown so we'll use emphasis
     text = `_${text}_`
@@ -127,7 +130,7 @@ function checkHeadingId(curHeadingId, toc) {
   })
 }
 
-function convertGoogleDocumentToJson(data, breadcrumb) {
+function convertGoogleDocumentToJson(data, breadcrumb = []) {
   const {body, inlineObjects, lists} = data
   const pages = []
   let content = []
@@ -240,10 +243,11 @@ function convertGoogleDocumentToJson(data, breadcrumb) {
             acc = acc.concat(code)
             return acc
           }, [])
+          const code = codeArr.join("").split("\u000b")
           content.push({
             code: {
               lang: "sh", //set default to sh
-              content: codeArr.join(" ").split("\u000b"),
+              content: code,
             },
           })
         }
