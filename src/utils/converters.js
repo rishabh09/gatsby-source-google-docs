@@ -94,26 +94,27 @@ function getText(element, {isHeader = false} = {}) {
 
   const tickRegex = /(?<=`)(.*?)(?=`)/g
   text = tickRegex.test(text) ? text : text.replace(/_/g, "\\_")
+  const isEmptyString = text.length === 0
 
-  if (underline) {
+  if (underline && !isEmptyString) {
     // Underline isn't supported in markdown so we'll use emphasis
     text = `_${text}_`
   }
 
-  if (italic) {
+  if (italic && !isEmptyString) {
     text = `_${text}_`
   }
 
   // Set bold unless it's a header
-  if (bold & !isHeader) {
+  if (bold & !isHeader && !isEmptyString) {
     text = `**${text}**`
   }
 
-  if (strikethrough) {
+  if (strikethrough && !isEmptyString) {
     text = `~~${text}~~`
   }
 
-  if (link) {
+  if (link && !isEmptyString) {
     return `[${text}](${link.url})`
   }
 
@@ -152,6 +153,7 @@ function convertGoogleDocumentToJson(data, breadcrumb = []) {
 
         const bulletContent = paragraph.elements
           .map(el => getBulletContent(inlineObjects, el))
+          .filter(text => text.length > 0)
           .join(" ")
           .replace(" .", ".")
           .replace(" ,", ",")
