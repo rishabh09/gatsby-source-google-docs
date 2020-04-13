@@ -84,37 +84,27 @@ function getBulletContent(inlineObjects, element) {
 
 function getText(element, {isHeader = false} = {}) {
   let text = cleanText(element.textRun.content)
-  const {
-    link,
-    underline,
-    strikethrough,
-    bold,
-    italic,
-  } = element.textRun.textStyle
+  const {link, strikethrough, bold, italic} = element.textRun.textStyle
 
-  const tickRegex = /(?<=`)(.*?)(?=`)/g
-  text = tickRegex.test(text) ? text : text.replace(/_/g, "\\_")
+  const tickRegex = /(?<=`)(.*?)/g
+  const isLineQuoute = tickRegex.test(text)
+  text = isLineQuoute ? text : text.replace(/_/g, "\\_")
   const isEmptyString = text.length === 0
 
-  if (underline && !isEmptyString) {
-    // Underline isn't supported in markdown so we'll use emphasis
-    text = `_${text}_`
-  }
-
-  if (italic && !isEmptyString) {
+  if (italic && !isEmptyString && !isLineQuoute) {
     text = `_${text}_`
   }
 
   // Set bold unless it's a header
-  if (bold & !isHeader && !isEmptyString) {
+  if (bold & !isHeader && !isEmptyString && !isLineQuoute) {
     text = `**${text}**`
   }
 
-  if (strikethrough && !isEmptyString) {
+  if (strikethrough && !isEmptyString && !isLineQuoute) {
     text = `~~${text}~~`
   }
 
-  if (link && !isEmptyString) {
+  if (link && !isEmptyString && !isLineQuoute) {
     return `[${text}](${link.url})`
   }
 
