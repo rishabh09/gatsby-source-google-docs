@@ -67,13 +67,18 @@ async function fetchGoogleDocsDocuments(pluginOptions) {
       })
       files = files.concat(docs)
     } else if (file.mimeType === MIME_TYPE_SHEET) {
-      const content = await fetchGoogleSpreadSheet({
+      const sheets = await fetchGoogleSpreadSheet({
         id: file.id,
       })
-      files.push({
-        ...file,
-        collection: pluginOptions.name,
-        content,
+
+      sheets.forEach(({name, content}) => {
+        files.push({
+          ...file,
+          id: file.id + "-" + name,
+          collection: pluginOptions.name,
+          name,
+          content,
+        })
       })
     } else {
       console.log("type :", file.mimeType)
