@@ -76,10 +76,11 @@ function getImage(inlineObjects, element) {
 function getBulletContent(inlineObjects, element) {
   if (element.inlineObjectElement) {
     const image = getImage(inlineObjects, element)
-    return `![${image.description}](${image.source} "${image.title}")`
+    const text = `![${image.description}](${image.source} "${image.title}")`
+    return {text, image}
   }
-
-  return getText(element)
+  const text = getText(element)
+  return {text}
 }
 
 function getText(element, {isHeader = false} = {}) {
@@ -125,6 +126,7 @@ function convertGoogleDocumentToJson(data, breadcrumb = []) {
   const {body, inlineObjects, lists} = data
   const pages = []
   let content = []
+  let images = []
   let toc = []
   let currentTitle = ""
 
@@ -141,13 +143,17 @@ function convertGoogleDocumentToJson(data, breadcrumb = []) {
         const listId = paragraph.bullet.listId
         const listTag = getListTag(lists[listId])
 
-        const bulletContent = paragraph.elements
-          .map(el => getBulletContent(inlineObjects, el))
+        const items = paragraph.elements.map(el =>
+          getBulletContent(inlineObjects, el)
+        )
+        const bulletContent = items
+          .map(({text}) => text)
           .filter(text => text.length > 0)
           .join(" ")
           .replace(" .", ".")
           .replace(" ,", ",")
-
+        const imgs = items.map(({image}) => image).filter(img => !!img)
+        images = imgs.concat(imgs)
         const prev = body.content[i - 1]
         const prevListId = _get(prev, "paragraph.bullet.listId")
 
@@ -182,6 +188,9 @@ function convertGoogleDocumentToJson(data, breadcrumb = []) {
               tagContent.push({
                 img: image,
               })
+              images.push({
+                img: image,
+              })
             }
           }
 
@@ -201,8 +210,10 @@ function convertGoogleDocumentToJson(data, breadcrumb = []) {
                 slug: slugGenerate(currentTitle),
                 title: currentTitle,
                 content: _cloneDeep(content),
+                images: _cloneDeep(images),
               })
               content = []
+              images = []
               currentTitle = text
             }
           }
@@ -278,6 +289,7 @@ function convertGoogleDocumentToJson(data, breadcrumb = []) {
         slug: slugGenerate(title),
         title: title,
         content: _cloneDeep(content),
+        images,
       })
     }
   })

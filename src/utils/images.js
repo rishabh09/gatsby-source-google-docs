@@ -10,12 +10,13 @@ async function getImagesNodes({
   reporter,
 }) {
   const imagesNodes = []
-
-  for (const element of document.content) {
-    if (element.img) {
+  const images =
+    (document.images && document.images.filter(arr => arr.length)) || []
+  for (const img in images) {
+    if (img) {
       const id = Date.now().toString(36)
       const name = `google-docs-image-${id}`
-      const url = element.img.source
+      const url = img.source
       const imageNode = await createRemoteFileNode({
         parentNodeId,
         name,

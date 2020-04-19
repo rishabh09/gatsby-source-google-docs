@@ -48,13 +48,14 @@ async function fetchGoogleDocsDocuments(pluginOptions) {
         breadcrumb: file.breadcrumb,
       })
 
-      const docs = pages.map(({content, slug, title}) => {
+      const docs = pages.map(({content, slug, title, images}) => {
         const newFile = {
           ...file,
           id: file.id + "-" + slug,
           slug,
           toc,
           title,
+          images,
           collection: pluginOptions.name,
         }
         const markdown = convertJsonToMarkdown({file: newFile, content})
