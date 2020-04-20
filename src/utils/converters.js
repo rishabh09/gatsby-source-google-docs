@@ -153,7 +153,7 @@ function convertGoogleDocumentToJson(data, breadcrumb = []) {
           .replace(" .", ".")
           .replace(" ,", ",")
         const imgs = items.map(({image}) => image).filter(img => !!img)
-        images = imgs.concat(imgs)
+        images = images.concat(imgs)
         const prev = body.content[i - 1]
         const prevListId = _get(prev, "paragraph.bullet.listId")
 

@@ -10,10 +10,9 @@ async function getImagesNodes({
   reporter,
 }) {
   const imagesNodes = []
-  const images =
-    (document.images && document.images.filter(arr => arr.length)) || []
-  for (const img in images) {
-    if (img) {
+  const images = document.images || []
+  for (const img of images) {
+    if (img && img.source) {
       const id = Date.now().toString(36)
       const name = `google-docs-image-${id}`
       const url = img.source
@@ -49,7 +48,6 @@ async function fetchAndReplaceGoogleImages({
   reporter,
 }) {
   let markdown = document.markdown
-
   const imagesNodes = await getImagesNodes({
     parentNodeId: documentNodeId,
     document,
