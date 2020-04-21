@@ -10,7 +10,9 @@ async function getImagesNodes({
   reporter,
 }) {
   const imagesNodes = []
-  const images = document.images || []
+  const elementImages =
+    (document.content && document.content.map(element => element.img)) || []
+  const images = elementImages.concat(document.images)
   for (const img of images) {
     if (img && img.source) {
       const id = Date.now().toString(36)
