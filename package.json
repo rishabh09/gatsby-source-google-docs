@@ -1,6 +1,6 @@
 {
   "name": "gatsby-source-google-docs-sheets",
-  "version": "3.2.2",
+  "version": "3.2.3",
   "description": "Gatsby plugin to use Google Docs & Sheets as a data source",
   "repository": "https://github.com/rishabh09/gatsby-source-google-docs",
   "author": {
