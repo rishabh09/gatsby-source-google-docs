@@ -44,7 +44,9 @@ function getTextFromParagraph(p) {
     ? p.elements
         .filter(el => el.textRun && el.textRun.content !== "\n")
         .map(el => (el.textRun ? getText(el) : ""))
-        .join("")
+        .join(" ")
+        .replace(" .", ".")
+        .replace(" ,", ",")
     : ""
 }
 
@@ -52,7 +54,7 @@ function getTableCellContent(content) {
   if (!content.length === 0) return ""
   return content
     .map(({paragraph}) => {
-      return cleanText(getTextFromParagraph(paragraph))
+      return getTextFromParagraph(paragraph)
     })
     .join("")
 }
@@ -85,11 +87,15 @@ function getBulletContent(inlineObjects, element) {
 
 function getText(element, {isHeader = false} = {}) {
   let text = cleanText(element.textRun.content)
+
   const {link, strikethrough, bold, italic} = element.textRun.textStyle
 
   const tickRegex = /(?<=`)(.*?)/g
   const isLineQuoute = tickRegex.test(text)
   text = isLineQuoute ? text : text.replace(/_/g, "\\_")
+  text = text.replace(/</g, "&lt;")
+  text = text.replace(/>/g, "&gt;")
+
   const isEmptyString = text.length === 0
 
   if (italic && !isEmptyString && !isLineQuoute) {
