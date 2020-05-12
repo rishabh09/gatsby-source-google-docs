@@ -30,8 +30,10 @@ function getListTag(list) {
   return glyphType !== undefined ? "ol" : "ul"
 }
 
-function cleanText(text) {
-  return text.replace(/\n/g, "").trim()
+function cleanText(text, ignoreLineBreak = false) {
+  return ignoreLineBreak
+    ? text.replace(/\n/g, "<br/>").trim()
+    : text.replace(/\n/g, "").trim()
 }
 
 function getNestedListIndent(level, listTag) {
@@ -39,11 +41,10 @@ function getNestedListIndent(level, listTag) {
   return `${_repeat("  ", level)}${indentType} `
 }
 
-function getTextFromParagraph(p) {
+function getTextFromParagraph(p, ignoreLineBreak = false) {
   return p.elements
     ? p.elements
-        .filter(el => el.textRun && el.textRun.content !== "\n")
-        .map(el => (el.textRun ? getText(el) : ""))
+        .map(el => (el.textRun ? getText(el, {ignoreLineBreak}) : ""))
         .join(" ")
         .replace(" .", ".")
         .replace(" ,", ",")
@@ -53,9 +54,7 @@ function getTextFromParagraph(p) {
 function getTableCellContent(content) {
   if (!content.length === 0) return ""
   return content
-    .map(({paragraph}) => {
-      return getTextFromParagraph(paragraph)
-    })
+    .map(({paragraph}) => getTextFromParagraph(paragraph, true))
     .join("")
 }
 
@@ -85,16 +84,17 @@ function getBulletContent(inlineObjects, element) {
   return {text}
 }
 
-function getText(element, {isHeader = false} = {}) {
-  let text = cleanText(element.textRun.content)
+function getText(element, {isHeader = false, ignoreLineBreak = false} = {}) {
+  let text = element.textRun.content
 
   const {link, strikethrough, bold, italic} = element.textRun.textStyle
 
   const tickRegex = /(?<=`)(.*?)/g
   const isLineQuoute = tickRegex.test(text)
   text = isLineQuoute ? text : text.replace(/_/g, "\\_")
-  text = text.replace(/</g, "&lt;")
+  text = text.replace(/<(?![<br/>])/g, "&lt;")
   text = text.replace(/>/g, "&gt;")
+  text = cleanText(text, ignoreLineBreak)
 
   const isEmptyString = text.length === 0
 
