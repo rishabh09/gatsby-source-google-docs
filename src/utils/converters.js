@@ -91,9 +91,6 @@ function getText(element, {isHeader = false, ignoreLineBreak = false} = {}) {
 
   const tickRegex = /(?<=`)(.*?)/g
   const isLineQuoute = tickRegex.test(text)
-  if (isLineQuoute) {
-    console.log(text)
-  }
   text = isLineQuoute ? text : text.replace(/_/g, "\\_")
   text = isLineQuoute ? text : text.replace(/<(?![<br/>])/g, "&lt;")
   text = isLineQuoute ? text : text.replace(/>/g, "&gt;")
