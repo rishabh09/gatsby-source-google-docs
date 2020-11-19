@@ -28,11 +28,24 @@ async function getImagesNodes({
         createNodeId,
         reporter,
       })
-
       if (imageNode) {
         imagesNodes.push(imageNode)
       } else {
-        throw new Error("Fail to fetch " + url)
+        const imageNode = await createRemoteFileNode({
+          parentNodeId,
+          name,
+          url,
+          store,
+          cache,
+          createNode,
+          createNodeId,
+          reporter,
+        })
+        if (imageNode) {
+          imagesNodes.push(imageNode)
+        } else {
+          throw new Error("Fail to fetch " + url)
+        }
       }
     }
   }
