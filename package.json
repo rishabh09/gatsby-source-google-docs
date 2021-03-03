@@ -1,6 +1,6 @@
 {
   "name": "gatsby-source-google-docs-sheets",
-  "version": "3.2.7",
+  "version": "4.0.0",
   "description": "Gatsby plugin to use Google Docs & Sheets as a data source",
   "repository": "https://github.com/rishabh09/gatsby-source-google-docs",
   "author": {
@@ -54,7 +54,7 @@
     "token": "./scripts/generate-token.js"
   },
   "bin": {
-    "gatsby-source-google-docs-token": "./scripts/generate-token.js"
+    "gatsby-source-google-docs-token": "scripts/generate-token.js"
   },
   "husky": {
     "hooks": {
